@@ -7,7 +7,22 @@ class MoviesController < ApplicationController
   end
 
   def index
-    @movies = Movie.all
+	headers = ["title","release_date"]
+	if params[:order_by].eql? "title" or params[:order_by].eql? "release_date"
+		@movies = Movie.order("#{params[:order_by]} ASC")
+	else
+    		@movies = Movie.all
+	end
+
+	# Check whether hilite or not
+	headers.each do |head|
+			nameClass = "class_#{head}"
+			if head.eql? params[:order_by]
+				flash[nameClass.to_sym] = "hilite"
+			else
+				flash[nameClass.to_sym] = ""
+			end
+	end
   end
 
   def new
