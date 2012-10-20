@@ -7,12 +7,28 @@ class MoviesController < ApplicationController
   end
 
   def index
+	@all_ratings = Movie.allRatings
+	@movies = Movie	
+
+	#Check if the array checked had been created before
+	@checkeds  =  @checkeds ? @checkeds : Hash.new{"true"}
+
+	# Check whether some filters or not
+	if params[:ratings].is_a? Enumerable and params[:ratings].length > 0
+		@checkeds = params[:ratings]
+	end
+
+	if @checkeds.length > 0
+		@movies = @movies.where(rating: @checkeds.keys)
+	end
+
 	headers = ["title","release_date"]
 	if params[:order_by].eql? "title" or params[:order_by].eql? "release_date"
-		@movies = Movie.order("#{params[:order_by]} ASC")
-	else
-    		@movies = Movie.all
+		@movies = @movies.order("#{params[:order_by]} ASC")
 	end
+    	
+	@movies = @movies.all
+	
 
 	# Check whether hilite or not
 	headers.each do |head|
