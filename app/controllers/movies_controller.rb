@@ -8,7 +8,20 @@ class MoviesController < ApplicationController
 
   def index
 	@all_ratings = Movie.allRatings
-	@movies = Movie	
+	@movies = Movie
+	headers = ["title","release_date"]	
+
+	#Check values from session if there aren't params
+	unless params.has_key?(:ratings) or params.has_key?(:order_by)
+		
+		params[:ratings] = params.has_key?(:ratings) ? params[:ratings] : session[:ratings]
+		params[:order_by] = params.has_key?(:order_by) ? params[:order_by] : session[:order_by]
+	
+		if session.has_key?(:ratings) or session.has_key?(:order_by)
+			flash.keep
+			redirect_to movies_path(params)
+		end
+	end
 
 	#Check if the array checked had been created before
 	@checkeds  =  @checkeds ? @checkeds : Hash.new{"true"}
@@ -17,13 +30,15 @@ class MoviesController < ApplicationController
 	if params[:ratings].is_a? Enumerable and params[:ratings].length > 0
 		@checkeds = params[:ratings]
 	end
+	
 
 	if @checkeds.length > 0
+		session[:ratings] =  @checkeds
 		@movies = @movies.where(rating: @checkeds.keys)
 	end
 
-	headers = ["title","release_date"]
 	if params[:order_by].eql? "title" or params[:order_by].eql? "release_date"
+		session[:order_by] =  params[:order_by]
 		@movies = @movies.order("#{params[:order_by]} ASC")
 	end
     	
